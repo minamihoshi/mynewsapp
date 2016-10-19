@@ -1,5 +1,6 @@
 package com.yztc.my.myapplication.javabean;
 
+import java.io.Serializable;
 import java.util.List;
 //type=shishang&key=f3d27e4df26bf1f9dc7dd4c93772870b
 
@@ -76,7 +77,7 @@ public class NewsData {
             this.data = data;
         }
 
-        public static class DataBean {
+        public static class DataBean implements Serializable {
             private String title;
             private String date;
             private String category;

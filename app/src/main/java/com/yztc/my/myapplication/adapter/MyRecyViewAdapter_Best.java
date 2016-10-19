@@ -21,12 +21,23 @@ import java.util.List;
  */
 public class MyRecyViewAdapter_Best extends RecyclerView.Adapter<RecyclerView.ViewHolder>  {
 
+
     private List<BestNewsData.ResultBean.DataBean> list;
     private Context context;
+    private MyItemClickListenerBest listener;
 
-    public MyRecyViewAdapter_Best(List list, Context context) {
+
+
+    public interface MyItemClickListenerBest{
+        void onClickBest(int position);
+
+        void onlongClickBest(int position);
+
+    }
+    public MyRecyViewAdapter_Best(List list, Context context,MyItemClickListenerBest listener) {
         this.list = list;
         this.context = context;
+        this.listener=listener;
     }
 
     @Override
@@ -37,7 +48,7 @@ public class MyRecyViewAdapter_Best extends RecyclerView.Adapter<RecyclerView.Vi
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
         BestNewsData.ResultBean.DataBean data = list.get(position);
         ((MyViewHolder)holder).miv_news.setImageResource(R.mipmap.ic_launcher);
         ((MyViewHolder)holder).mtv_title.setText(data.getTitle());
@@ -52,6 +63,20 @@ public class MyRecyViewAdapter_Best extends RecyclerView.Adapter<RecyclerView.Vi
                     .placeholder(R.mipmap.ic_launcher).error(R.mipmap.ic_launcher)
                     .into(((MyViewHolder)holder).miv_news);
         }
+        ((MyViewHolder)holder).itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                listener.onClickBest(position);
+            }
+        });
+
+        ((MyViewHolder)holder).itemView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                listener.onlongClickBest(position);
+                return true;
+            }
+        });
 
     }
 

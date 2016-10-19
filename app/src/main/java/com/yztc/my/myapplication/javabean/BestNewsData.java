@@ -1,5 +1,6 @@
 package com.yztc.my.myapplication.javabean;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -47,7 +48,7 @@ public class BestNewsData {
         this.error_code = error_code;
     }
 
-    public static class ResultBean {
+    public static class ResultBean  {
         private String stat;
         /**
          * title : 知情人曝孙杨与前女友有私生子！女方独立养至2岁
@@ -80,7 +81,7 @@ public class BestNewsData {
             this.data = data;
         }
 
-        public static class DataBean {
+        public static class DataBean implements Serializable{
             private String title;
             private String date;
             private String author_name;

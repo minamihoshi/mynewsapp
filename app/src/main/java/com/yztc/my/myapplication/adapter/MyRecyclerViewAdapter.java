@@ -22,10 +22,18 @@ import java.util.List;
 public class MyRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private List<NewsData.ResultBean.DataBean> list;
     private Context context;
+    private MyItemClickListener listener;
 
-    public MyRecyclerViewAdapter(List list, Context context) {
+    public interface  MyItemClickListener{
+        void onClick(int position);
+
+        void onlongClick(int position);
+    }
+
+    public MyRecyclerViewAdapter(List list, Context context,MyItemClickListener listener) {
         this.list = list;
         this.context = context;
+        this.listener=listener;
     }
 
     @Override
@@ -36,7 +44,7 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
         NewsData.ResultBean.DataBean data = list.get(position);
         ((MyViewHolder)holder).miv_news.setImageResource(R.mipmap.ic_launcher);
         ((MyViewHolder)holder).mtv_title.setText(data.getTitle());
@@ -51,6 +59,22 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                     .placeholder(R.mipmap.ic_launcher).error(R.mipmap.ic_launcher)
                     .into(((MyViewHolder)holder).miv_news);
         }
+
+        ((MyViewHolder)holder).itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                listener.onClick(position);
+            }
+        });
+        ((MyViewHolder)holder).itemView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+
+                listener.onlongClick(position);
+                return true;
+            }
+        });
+
 
     }
 

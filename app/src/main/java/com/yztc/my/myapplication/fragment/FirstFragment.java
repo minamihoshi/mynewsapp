@@ -1,6 +1,7 @@
 package com.yztc.my.myapplication.fragment;
 
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -20,6 +21,7 @@ import android.widget.Toast;
 import com.google.gson.Gson;
 import com.jcodecraeer.xrecyclerview.XRecyclerView;
 import com.yztc.my.myapplication.R;
+import com.yztc.my.myapplication.activity.WebActivity;
 import com.yztc.my.myapplication.adapter.MyRecyViewAdapter_Best;
 import com.yztc.my.myapplication.adapter.MyRecyclerViewAdapter;
 import com.yztc.my.myapplication.constant.MyConstants;
@@ -39,7 +41,7 @@ import okhttp3.ResponseBody;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class FirstFragment extends Fragment {
+public class FirstFragment extends Fragment implements MyRecyclerViewAdapter.MyItemClickListener,MyRecyViewAdapter_Best.MyItemClickListenerBest{
    private XRecyclerView recyclerView;
  private List<BestNewsData.ResultBean.DataBean> list_best;
  private List<NewsData.ResultBean.DataBean> list;
@@ -48,6 +50,7 @@ public class FirstFragment extends Fragment {
   private MyRecyclerViewAdapter recyclerViewAdapter;
   private MyRecyViewAdapter_Best recyViewAdapter_best;
     private String  string;
+    private String type;
 
     private Handler handler = new Handler(){
         @Override
@@ -56,9 +59,11 @@ public class FirstFragment extends Fragment {
             switch (msg.what){
                 case 1 :
                     recyViewAdapter_best.notifyDataSetChanged();
+                    Log.e("TAG", "handleMessage: "+"notifyyyyyyyyyyyyyyyyyyyyyyyy");
                     break;
                 case 2:
                     recyclerViewAdapter.notifyDataSetChanged();
+                    Log.e("TAG", "handleMessage: "+"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
                     break;
                 case 3:
                     recyclerView.refreshComplete();
@@ -79,7 +84,7 @@ public class FirstFragment extends Fragment {
         // Inflate the layout for this fragment
      View rootview = inflater.inflate(R.layout.fragment_first, container, false);
      Bundle bundle = getArguments();
-     String type = bundle.getString(MyConstants.TYPE_KEY);
+     type = bundle.getString(MyConstants.TYPE_KEY);
 
       string = String.format(MyConstants.FORMAT_UTLSTRING,type);
      Log.e("TAG", "onCreateView: "+string );
@@ -104,18 +109,20 @@ public class FirstFragment extends Fragment {
 
              Gson gson = new Gson();
 
-             if(!TextUtils.isEmpty(datastring)&&datastring.equals("top")){
+             if(!TextUtils.isEmpty(datastring)&&type.equals("top")){
                  BestNewsData bestNewsData = gson.fromJson(datastring, BestNewsData.class);
                 list_best_temp = bestNewsData.getResult().getData();
                  list_best.addAll(0,list_best_temp);
                  Message message = new Message();
                  message.what =1;
+
                  handler.sendMessage(message);
 
              }else{
                  NewsData newsData = gson.fromJson(datastring, NewsData.class);
                  list_temp=newsData.getResult().getData();
                  list.addAll(0,list_temp);
+                 Log.e("TAG", "onResponse: "+list_temp.get(0).getCategory());
                  Message message = new Message();
                  message.what =2;
                  handler.sendMessage(message);
@@ -138,9 +145,9 @@ public class FirstFragment extends Fragment {
  private void initAdapter(String type) {
      list= new ArrayList<>();
      list_best = new ArrayList<>();
-  recyclerViewAdapter = new MyRecyclerViewAdapter(list,getActivity());
-  recyViewAdapter_best = new MyRecyViewAdapter_Best(list_best,getActivity());
-     if(TextUtils.isEmpty(type)&&type.equals("top")){
+  recyclerViewAdapter = new MyRecyclerViewAdapter(list,getActivity(),this);
+  recyViewAdapter_best = new MyRecyViewAdapter_Best(list_best,getActivity(),this);
+     if(!TextUtils.isEmpty(type)&&type.equals("top")){
          recyclerView.setAdapter(recyViewAdapter_best);
      }else{
          recyclerView.setAdapter(recyclerViewAdapter);
@@ -176,5 +183,39 @@ public class FirstFragment extends Fragment {
 
 
     }
+   //其他新闻的点击回调
+    @Override
+    public void onClick(int position) {
+       Toast.makeText(getActivity(),"other",Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(getActivity(), WebActivity.class);
+        Bundle bundle = new Bundle();
+        NewsData.ResultBean.DataBean dataBean = list.get(position);
+        bundle.putSerializable(MyConstants.KEY_WEB,dataBean);
+        intent.putExtras(bundle);
+        startActivity(intent);
 
+
+    }
+
+    @Override
+    public void onlongClick(int position) {
+       Toast.makeText(getActivity(),"otherlong",Toast.LENGTH_SHORT).show();
+
+    }
+    //头条新闻的回调
+    @Override
+    public void onClickBest(int position) {
+        Toast.makeText(getActivity(),"top",Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(getActivity(), WebActivity.class);
+        Bundle bundle = new Bundle();
+        BestNewsData.ResultBean.DataBean dataBean = list_best.get(position);
+        bundle.putSerializable(MyConstants.KEY_WEB,dataBean);
+        intent.putExtras(bundle);
+        startActivity(intent);
+    }
+
+    @Override
+    public void onlongClickBest(int position) {
+        Toast.makeText(getActivity(),"toplong",Toast.LENGTH_SHORT).show();
+    }
 }
