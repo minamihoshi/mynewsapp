@@ -43,8 +43,8 @@ import okhttp3.ResponseBody;
  */
 public class FirstFragment extends Fragment implements MyRecyclerViewAdapter.MyItemClickListener,MyRecyViewAdapter_Best.MyItemClickListenerBest{
    private XRecyclerView recyclerView;
- private List<BestNewsData.ResultBean.DataBean> list_best;
- private List<NewsData.ResultBean.DataBean> list;
+    private List<BestNewsData.ResultBean.DataBean> list_best;
+    private List<NewsData.ResultBean.DataBean> list;
     private List<BestNewsData.ResultBean.DataBean> list_best_temp;
     private List<NewsData.ResultBean.DataBean> list_temp;
   private MyRecyclerViewAdapter recyclerViewAdapter;

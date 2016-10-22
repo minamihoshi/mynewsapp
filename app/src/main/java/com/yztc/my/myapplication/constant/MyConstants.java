@@ -11,4 +11,6 @@ public class MyConstants {
     public static final String TYPE_KEY = "TYPE_KEY";
 
     public static final String KEY_WEB ="KEY_WEB";
+
+
 }

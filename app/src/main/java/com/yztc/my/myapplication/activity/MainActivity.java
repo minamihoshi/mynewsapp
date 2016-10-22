@@ -1,5 +1,6 @@
 package com.yztc.my.myapplication.activity;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
@@ -92,7 +93,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void initView() {
          toolbar = (Toolbar) findViewById(R.id.toolbar);
-       toolbar.setTitleTextColor(Color.parseColor("#ff00dd"));
+        toolbar.setTitleTextColor(Color.parseColor("#ff00dd"));
          drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("lalala");
@@ -147,6 +148,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Handle navigation view item clicks here.
         int id = item.getItemId();
         if (id == R.id.nav_camera) {
+            Intent intent = new Intent(this,SaveActivity.class);
+            startActivity(intent);
             // Handle the camera action
         } else if (id == R.id.nav_gallery) {
 

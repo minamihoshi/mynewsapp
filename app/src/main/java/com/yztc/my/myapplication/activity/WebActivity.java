@@ -21,8 +21,10 @@ import android.widget.Toast;
 
 
 import com.yztc.my.myapplication.R;
+import com.yztc.my.myapplication.base.App;
 import com.yztc.my.myapplication.constant.MyConstants;
 import com.yztc.my.myapplication.javabean.BestNewsData;
+import com.yztc.my.myapplication.javabean.MyNewsData;
 import com.yztc.my.myapplication.javabean.NewsData;
 import com.yztc.my.myapplication.util.OkHttpUtils;
 
@@ -43,6 +45,7 @@ public class WebActivity extends AppCompatActivity {
     private String title;
     private NewsData.ResultBean.DataBean dataBean;
     private BestNewsData.ResultBean.DataBean dataBean_best;
+    private MyNewsData myNewsBean;
 
    // private NewsInfoManager manager;
     @Override
@@ -53,15 +56,42 @@ public class WebActivity extends AppCompatActivity {
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();
         Serializable serializable = bundle.getSerializable(MyConstants.KEY_WEB);
+
         if(serializable instanceof BestNewsData.ResultBean.DataBean){
             dataBean_best =(BestNewsData.ResultBean.DataBean)serializable;
+
+            myNewsBean =new MyNewsData(dataBean_best.getTitle(),
+                    dataBean_best.getDate(),
+                    dataBean_best.getAuthor_name(),
+                    dataBean_best.getThumbnail_pic_s(),
+                    dataBean_best.getThumbnail_pic_s03(),
+                    dataBean_best.getUrl(),
+                    dataBean_best.getType(),
+                    dataBean_best.getRealtype()
+                    );
             title =dataBean_best.getTitle();
             webstring= dataBean_best.getUrl();
             Log.e("TAG", "onCreate: "+webstring );
         }else if(serializable instanceof NewsData.ResultBean.DataBean){
             dataBean =(NewsData.ResultBean.DataBean)serializable;
+            myNewsBean =new MyNewsData(dataBean.getTitle(),
+                    dataBean.getDate(),
+                    dataBean.getAuthor_name(),
+                    dataBean.getThumbnail_pic_s(),
+                    dataBean.getThumbnail_pic_s03(),
+                    dataBean.getUrl(),
+                    dataBean.getCategory(),
+                    dataBean.getCategory()
+            );
+
+
             title = dataBean.getTitle();
             webstring =dataBean.getUrl();
+            Log.e("TAG", "onCreate: "+webstring );
+        }else{
+            myNewsBean = (MyNewsData) serializable;
+            title =myNewsBean.getTitle();
+            webstring =myNewsBean.getUrl();
             Log.e("TAG", "onCreate: "+webstring );
         }
 
@@ -100,48 +130,7 @@ public class WebActivity extends AppCompatActivity {
         webView.loadUrl(webstring);
     }
 
-//    private void initDataManager() {
-//        manager = new NewsInfoManager(this);
-//    }
 
-//    private void initWebData() {
-////        String id = dataBean.getId();
-////        String stringurl = String.format(URLConstants.WEB_URL, id);
-//        Log.e("TAG", "initWebData: "+webstring);
-//        OkHttpUtils.doGETRequest(webstring, new Callback() {
-//            @Override
-//            public void onFailure(Call call, IOException e) {
-//
-//            }
-//
-//            @Override
-//            public void onResponse(Call call, Response response) throws IOException {
-//
-//                ResponseBody body = response.body();
-//                String string = body.string();
-//
-//                try {
-//                    JSONObject jsonObject = new JSONObject(string);
-//                    JSONObject jsonObject1 =jsonObject.getJSONObject("data");
-//                    webstring =jsonObject1.getString("wap_content");
-//
-//                } catch (JSONException e) {
-//                    e.printStackTrace();
-//                }
-//
-//                runOnUiThread(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        webView.loadDataWithBaseURL(null,webstring,"text/html","UTF-8",null);
-//
-//
-//                    }
-//                });
-//
-//            }
-//        });
-//
-//    }
 
     private void initView() {
 
@@ -183,13 +172,15 @@ public class WebActivity extends AppCompatActivity {
                 break;
             case R.id.save:
 
-//                long insert = manager.insert(dataBean);
-//                if(insert>0){
-//                    Toast.makeText(this,"收藏成功",Toast.LENGTH_SHORT).show();
-//                }else{
-//                    Toast.makeText(this,"已经收藏过了~",Toast.LENGTH_SHORT).show();
-//                }
-//                break;
+                long savecode = ((App) getApplication()).liteOrm.insert(myNewsBean);
+                Log.e("TAG", "----------------------------------"+savecode);
+
+                if(savecode>0){
+                    Toast.makeText(this,"收藏成功",Toast.LENGTH_SHORT).show();
+                }else{
+                    Toast.makeText(this,"已经收藏过了~",Toast.LENGTH_SHORT).show();
+                }
+                break;
 
         }
         return super.onOptionsItemSelected(item);
