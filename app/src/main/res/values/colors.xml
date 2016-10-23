@@ -4,4 +4,13 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
     <color name="kong">#00ffffff</color>
+    <color name="gray">#77999999</color>
+    <color name="black_overlay">#66000000</color>
+
+    <color name="mycolor">#c3bed4</color>
+    <color name="mycolor2">#f8c3cd</color>
+    <color name="mycolor3">#b19693</color>
+    <color name="mycgreen">#a8d8b9</color>
+    <color name="mygreen">#268785</color>
+    <color name="nando">#305a56</color>
 </resources>

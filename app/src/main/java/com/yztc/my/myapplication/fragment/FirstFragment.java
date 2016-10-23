@@ -2,6 +2,7 @@ package com.yztc.my.myapplication.fragment;
 
 
 import android.content.Intent;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -11,21 +12,27 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.jcodecraeer.xrecyclerview.XRecyclerView;
 import com.yztc.my.myapplication.R;
+import com.yztc.my.myapplication.activity.MainActivity;
 import com.yztc.my.myapplication.activity.WebActivity;
 import com.yztc.my.myapplication.adapter.MyRecyViewAdapter_Best;
 import com.yztc.my.myapplication.adapter.MyRecyclerViewAdapter;
+import com.yztc.my.myapplication.base.App;
 import com.yztc.my.myapplication.constant.MyConstants;
 import com.yztc.my.myapplication.javabean.BestNewsData;
+import com.yztc.my.myapplication.javabean.MyNewsData;
 import com.yztc.my.myapplication.javabean.NewsData;
 import com.yztc.my.myapplication.util.OkHttpUtils;
 
@@ -47,10 +54,16 @@ public class FirstFragment extends Fragment implements MyRecyclerViewAdapter.MyI
     private List<NewsData.ResultBean.DataBean> list;
     private List<BestNewsData.ResultBean.DataBean> list_best_temp;
     private List<NewsData.ResultBean.DataBean> list_temp;
-  private MyRecyclerViewAdapter recyclerViewAdapter;
-  private MyRecyViewAdapter_Best recyViewAdapter_best;
+    private MyRecyclerViewAdapter recyclerViewAdapter;
+    private MyRecyViewAdapter_Best recyViewAdapter_best;
     private String  string;
     private String type;
+    private PopupWindow popupWindow;
+    private int itemposition;
+    private Button mbtn_openweb,mbtn_save;
+    private MyNewsData myNewsBean;
+    private View headerView;
+    private View footView;
 
     private Handler handler = new Handler(){
         @Override
@@ -67,6 +80,7 @@ public class FirstFragment extends Fragment implements MyRecyclerViewAdapter.MyI
                     break;
                 case 3:
                     recyclerView.refreshComplete();
+                    footView.setVisibility(View.INVISIBLE);
                     break;
             }
 
@@ -91,6 +105,7 @@ public class FirstFragment extends Fragment implements MyRecyclerViewAdapter.MyI
         initDatas(string);
         initView(rootview);
         initAdapter(type);
+        initPopup();
 
         return rootview;
     }
@@ -99,7 +114,9 @@ public class FirstFragment extends Fragment implements MyRecyclerViewAdapter.MyI
      OkHttpUtils.doGETRequest(string, new Callback() {
          @Override
          public void onFailure(Call call, IOException e) {
-
+             Message message = new Message();
+             message.what =3;
+             handler.sendMessage(message);
          }
 
          @Override
@@ -136,6 +153,7 @@ public class FirstFragment extends Fragment implements MyRecyclerViewAdapter.MyI
 
 
 
+
          }
      });
 
@@ -163,48 +181,59 @@ public class FirstFragment extends Fragment implements MyRecyclerViewAdapter.MyI
      recyclerView.setLoadingListener(new XRecyclerView.LoadingListener() {
          @Override
          public void onRefresh() {
-             Toast.makeText(getActivity(),"123",Toast.LENGTH_LONG).show();
+             //Toast.makeText(getActivity(),"123",Toast.LENGTH_LONG).show();
              initDatas(string);
          }
 
          @Override
          public void onLoadMore() {
              Toast.makeText(getActivity(),"没有了去看看别的吧~",Toast.LENGTH_LONG).show();
-
              recyclerView.loadMoreComplete();
          }
      });
 
-     View view = LayoutInflater.from(getActivity()).inflate(R.layout.listview_header, null, false);
-     View view1 =LayoutInflater.from(getActivity()).inflate(R.layout.listview_footer,null,false);
-     recyclerView.addHeaderView(view);
-     recyclerView.addFootView(view1);
-     recyclerView.setArrowImageView(R.mipmap.ic_launcher);
+     headerView = LayoutInflater.from(getActivity()).inflate(R.layout.listview_header, recyclerView, false);
+    footView =LayoutInflater.from(getActivity()).inflate(R.layout.listview_footer,recyclerView,false);
+     recyclerView.addHeaderView(headerView);
+     recyclerView.addFootView(footView);
+
+     recyclerView.setArrowImageView(R.drawable.ic_pulltorefresh_arrow);
 
 
     }
    //其他新闻的点击回调
     @Override
     public void onClick(int position) {
-       Toast.makeText(getActivity(),"other",Toast.LENGTH_SHORT).show();
+        openweb_other(position);
+
+
+    }
+
+    private void openweb_other(int position) {
+        //Toast.makeText(getActivity(),"other",Toast.LENGTH_SHORT).show();
         Intent intent = new Intent(getActivity(), WebActivity.class);
         Bundle bundle = new Bundle();
         NewsData.ResultBean.DataBean dataBean = list.get(position);
         bundle.putSerializable(MyConstants.KEY_WEB,dataBean);
         intent.putExtras(bundle);
         startActivity(intent);
-
-
     }
 
     @Override
     public void onlongClick(int position) {
-       Toast.makeText(getActivity(),"otherlong",Toast.LENGTH_SHORT).show();
+
+        popupWindow.showAtLocation(recyclerView, Gravity.CENTER, 0, 0);
+        itemposition =position;
+
 
     }
     //头条新闻的回调
     @Override
     public void onClickBest(int position) {
+        openweb(position);
+    }
+
+    private void openweb(int position) {
         Toast.makeText(getActivity(),"top",Toast.LENGTH_SHORT).show();
         Intent intent = new Intent(getActivity(), WebActivity.class);
         Bundle bundle = new Bundle();
@@ -217,5 +246,70 @@ public class FirstFragment extends Fragment implements MyRecyclerViewAdapter.MyI
     @Override
     public void onlongClickBest(int position) {
         Toast.makeText(getActivity(),"toplong",Toast.LENGTH_SHORT).show();
+        popupWindow.showAtLocation(recyclerView, Gravity.CENTER, 0, 0);
+        itemposition =position;
     }
+
+
+//    public void scrollTop(){
+//        recyclerView.smoothScrollToPosition(0);
+//    }
+
+
+    private void initPopup() {
+        View view = LayoutInflater.from(getActivity()).inflate(R.layout.layout_popupwindow_main, null);
+
+
+        popupWindow = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        popupWindow.setBackgroundDrawable(new ColorDrawable());
+        popupWindow.setOutsideTouchable(true);
+        popupWindow.setTouchable(true);
+        popupWindow.setFocusable(true);
+        mbtn_openweb = (Button) view.findViewById(R.id.btn_openweb);
+        mbtn_openweb.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                popupWindow.dismiss();
+                if(list_best.size()!=0){
+                    openweb(itemposition);
+                }else{
+
+                    openweb_other(itemposition);
+                }
+
+            }
+        });
+
+        mbtn_save = (Button) view.findViewById(R.id.btn_save);
+        mbtn_save.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                if(list_best.size()!=0){
+                    BestNewsData.ResultBean.DataBean dataBean = list_best.get(itemposition);
+                    myNewsBean = new MyNewsData(dataBean.getTitle(),dataBean.getDate(),dataBean.getAuthor_name(),dataBean.getThumbnail_pic_s(),dataBean.getThumbnail_pic_s03(),dataBean.getUrl(),dataBean.getType(),dataBean.getRealtype());
+                }else{
+                    NewsData.ResultBean.DataBean dataBean = list.get(itemposition);
+                    myNewsBean = new MyNewsData(dataBean.getTitle(),dataBean.getDate(),dataBean.getAuthor_name(),dataBean.getThumbnail_pic_s(),dataBean.getThumbnail_pic_s03(),dataBean.getUrl(),dataBean.getCategory(),dataBean.getCategory());
+                }
+
+                long savecode = ((App) (getActivity().getApplication())).liteOrm.insert(myNewsBean);
+                Log.e("TAG", "----------------------------------"+savecode);
+
+                if(savecode>0){
+                    Toast.makeText(getActivity(),"收藏成功",Toast.LENGTH_SHORT).show();
+                }else{
+                    Toast.makeText(getActivity(),"已经收藏过了~",Toast.LENGTH_SHORT).show();
+                }
+
+                popupWindow.dismiss();
+                // adapter.notifyItemRemoved(itemposition);
+                //不通知list中的所有item改变下标 原因不明  在判断position时有问题
+               // adapter.notifyDataSetChanged();
+
+            }
+        });
+    }
+
+
 }

@@ -2,7 +2,9 @@ package com.yztc.my.myapplication.activity;
 
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -10,6 +12,7 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -20,6 +23,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TableLayout;
+import android.widget.Toast;
 
 import com.yztc.my.myapplication.R;
 import com.yztc.my.myapplication.adapter.Myadapter;
@@ -29,6 +33,16 @@ import com.yztc.my.myapplication.fragment.FirstFragment;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+    private long backStartTime,backEndTime;
+    private CollapsingToolbarLayoutState state;
+
+    private enum CollapsingToolbarLayoutState {
+        EXPANDED,
+        COLLAPSED,
+        INTERNEDIATE
+    }
+    private FirstFragment fragment;
+    private AppBarLayout appBarLayout;
     private Toolbar toolbar;
     private DrawerLayout drawer;
     private NavigationView navigationView;
@@ -54,14 +68,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+//        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+//        fab.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+//                        .setAction("Action", new View.OnClickListener() {
+//                            @Override
+//                            public void onClick(View view) {
+//
+//                            }
+//                        }).show();
+//            }
+//        });
 
 
 
@@ -70,8 +89,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
-        long timeMillis1 = System.currentTimeMillis();
-        Log.e("TAG", "onCreate: "+timeMillis1);
+        //点击toolbar 将列表滚动到最上
+
+//        toolbar.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                backEndTime = System.currentTimeMillis();
+//                if (backEndTime - backStartTime > 2000) {
+//                    Toast.makeText(MainActivity.this, "滚动", Toast.LENGTH_SHORT).show();
+//                    backStartTime = backEndTime;
+//                }else{
+//                    Log.e("TAG", "+++++++++++++++"+mViewPager.getChildCount());
+//                   // fragment.scrollTop();
+//                }
+//            }
+//        });
+
 
     }
 
@@ -82,6 +115,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void initFragments() {
         for(int i =0;i<TABS.length;i++){
             FirstFragment fragment =new FirstFragment();
+
             Bundle bundle = new Bundle();
             bundle.putString(MyConstants.TYPE_KEY,TABTYPES[i]);
             fragment.setArguments(bundle);
@@ -93,21 +127,50 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void initView() {
          toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitleTextColor(Color.parseColor("#ff00dd"));
+        toolbar.setTitleTextColor(Color.parseColor("#ffffff"));
          drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle("lalala");
         mTabLayout = (TabLayout) findViewById(R.id.mtablayout);
         mViewPager = (ViewPager) findViewById(R.id.myviewpager);
         mViewPager.setAdapter(myadapter);
         mTabLayout.setupWithViewPager(mViewPager);
         mTabLayout.setBackgroundColor(getResources().getColor(R.color.kong));
         mTabLayout.setTabMode(TabLayout.MODE_SCROLLABLE);
-         navigationView = (NavigationView) findViewById(R.id.nav_view);
+
+        navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
         collapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsing);
         collapsingToolbarLayout.setTitleEnabled(false);
+
+        appBarLayout = (AppBarLayout) findViewById(R.id.app_bar);
+
+
+        appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
+            @Override
+            public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
+
+                if (verticalOffset == 0) {
+                    if (state != CollapsingToolbarLayoutState.EXPANDED) {
+                        state = CollapsingToolbarLayoutState.EXPANDED;//修改状态标记为展开
+                        toolbar.setTitle("");//设置title为EXPANDED
+                    }
+                } else if (Math.abs(verticalOffset) >= appBarLayout.getTotalScrollRange()) {
+                    if (state != CollapsingToolbarLayoutState.COLLAPSED) {
+                        toolbar.setTitle("新闻早知道");//设置title不显示
+                        state = CollapsingToolbarLayoutState.COLLAPSED;//修改状态标记为折叠
+                    }
+                } else {
+                    if (state != CollapsingToolbarLayoutState.INTERNEDIATE) {
+                        if(state == CollapsingToolbarLayoutState.COLLAPSED){
+                        }
+                        toolbar.setTitle("");//设置title为INTERNEDIATE
+                        state = CollapsingToolbarLayoutState.INTERNEDIATE;//修改状态标记为中间
+                    }
+                }
+            }
+        });
+
     }
 
     @Override
@@ -137,6 +200,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
+        }else if(id== R.id.action_save){
+            Intent intent = new Intent(this,SaveActivity.class);
+            startActivity(intent);
         }
 
         return super.onOptionsItemSelected(item);
@@ -148,10 +214,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Handle navigation view item clicks here.
         int id = item.getItemId();
         if (id == R.id.nav_camera) {
-            Intent intent = new Intent(this,SaveActivity.class);
-            startActivity(intent);
+
             // Handle the camera action
         } else if (id == R.id.nav_gallery) {
+            Intent intent = new Intent(this,SaveActivity.class);
+            startActivity(intent);
 
         } else if (id == R.id.nav_slideshow) {
 
@@ -167,4 +234,27 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            backEndTime = System.currentTimeMillis();
+            if (backEndTime - backStartTime > 2000) {
+                Toast.makeText(this, "连续按两次退出程序", Toast.LENGTH_SHORT).show();
+                backStartTime = backEndTime;
+                return true;
+            }
+//            else {
+//                finish();
+//            }
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
+
+
+
+
+
 }

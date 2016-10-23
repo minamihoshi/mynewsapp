@@ -20,7 +20,7 @@
     android:id="@+id/collapsing"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    app:contentScrim="@color/colorAccent"
+    app:contentScrim="@color/mygreen"
     app:layout_scrollFlags="scroll|enterAlwaysCollapsed|exitUntilCollapsed"
     >
     <ImageView
@@ -43,16 +43,16 @@
                />
     <android.support.design.widget.TabLayout
         android:layout_gravity="bottom"
-        android:background="#ff0000"
+
         android:id="@+id/mtablayout"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        app:tabIndicatorColor="@color/colorAccent">
+        android:layout_height="40dp"
+        android:foregroundGravity="bottom"
+        app:tabIndicatorColor="@color/mycolor">
 
     </android.support.design.widget.TabLayout>
 
 </android.support.design.widget.CollapsingToolbarLayout>
-
 
     </android.support.design.widget.AppBarLayout>
 
@@ -62,15 +62,15 @@
        android:layout_height="match_parent"
        app:layout_behavior="@string/appbar_scrolling_view_behavior"></android.support.v4.view.ViewPager>
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/fab_margin"
-        android:src="@android:drawable/ic_input_add"
- android:layout_gravity="bottom|end"
-        app:backgroundTint="#00ff00"
-        app:rippleColor="#ff0000"
-        app:borderWidth="0dp"/>
+    <!--<android.support.design.widget.FloatingActionButton-->
+        <!--android:id="@+id/fab"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_margin="@dimen/fab_margin"-->
+        <!--android:src="@android:drawable/ic_input_add"-->
+ <!--android:layout_gravity="bottom|end"-->
+        <!--app:backgroundTint="#00ff00"-->
+        <!--app:rippleColor="#ff0000"-->
+        <!--app:borderWidth="0dp"/>-->
 
 </android.support.design.widget.CoordinatorLayout>
