@@ -2,6 +2,8 @@ package com.yztc.my.myapplication.fragment;
 
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -16,6 +18,8 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.ScaleAnimation;
+import android.view.animation.TranslateAnimation;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
@@ -23,9 +27,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
+import com.google.zxing.WriterException;
 import com.jcodecraeer.xrecyclerview.XRecyclerView;
 import com.yztc.my.myapplication.R;
 import com.yztc.my.myapplication.activity.MainActivity;
+import com.yztc.my.myapplication.activity.ScanCodeActivity;
 import com.yztc.my.myapplication.activity.WebActivity;
 import com.yztc.my.myapplication.adapter.MyRecyViewAdapter_Best;
 import com.yztc.my.myapplication.adapter.MyRecyclerViewAdapter;
@@ -35,6 +41,7 @@ import com.yztc.my.myapplication.javabean.BestNewsData;
 import com.yztc.my.myapplication.javabean.MyNewsData;
 import com.yztc.my.myapplication.javabean.NewsData;
 import com.yztc.my.myapplication.util.OkHttpUtils;
+import com.yztc.zxinglibrary.encode.CodeCreator;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -60,7 +67,7 @@ public class FirstFragment extends Fragment implements MyRecyclerViewAdapter.MyI
     private String type;
     private PopupWindow popupWindow;
     private int itemposition;
-    private Button mbtn_openweb,mbtn_save;
+    private Button mbtn_openweb,mbtn_save,mbtn_scancode;
     private MyNewsData myNewsBean;
     private View headerView;
     private View footView;
@@ -80,7 +87,10 @@ public class FirstFragment extends Fragment implements MyRecyclerViewAdapter.MyI
                     break;
                 case 3:
                     recyclerView.refreshComplete();
-                    footView.setVisibility(View.INVISIBLE);
+                    TranslateAnimation translateAnimation = new TranslateAnimation(0, 0, -100, -100);
+                    footView.setAnimation(translateAnimation);
+                    translateAnimation.start();
+
                     break;
             }
 
@@ -187,12 +197,12 @@ public class FirstFragment extends Fragment implements MyRecyclerViewAdapter.MyI
 
          @Override
          public void onLoadMore() {
-             Toast.makeText(getActivity(),"没有了去看看别的吧~",Toast.LENGTH_LONG).show();
+             Toast.makeText(getActivity(),"再怎么找也没有了~",Toast.LENGTH_LONG).show();
              recyclerView.loadMoreComplete();
          }
      });
 
-     headerView = LayoutInflater.from(getActivity()).inflate(R.layout.listview_header, recyclerView, false);
+     headerView = LayoutInflater.from(getActivity()).inflate(R.layout.layout_myheader, recyclerView, false);
     footView =LayoutInflater.from(getActivity()).inflate(R.layout.listview_footer,recyclerView,false);
      recyclerView.addHeaderView(headerView);
      recyclerView.addFootView(footView);
@@ -234,7 +244,7 @@ public class FirstFragment extends Fragment implements MyRecyclerViewAdapter.MyI
     }
 
     private void openweb(int position) {
-        Toast.makeText(getActivity(),"top",Toast.LENGTH_SHORT).show();
+        //Toast.makeText(getActivity(),"top",Toast.LENGTH_SHORT).show();
         Intent intent = new Intent(getActivity(), WebActivity.class);
         Bundle bundle = new Bundle();
         BestNewsData.ResultBean.DataBean dataBean = list_best.get(position);
@@ -245,7 +255,7 @@ public class FirstFragment extends Fragment implements MyRecyclerViewAdapter.MyI
 
     @Override
     public void onlongClickBest(int position) {
-        Toast.makeText(getActivity(),"toplong",Toast.LENGTH_SHORT).show();
+        //Toast.makeText(getActivity(),"toplong",Toast.LENGTH_SHORT).show();
         popupWindow.showAtLocation(recyclerView, Gravity.CENTER, 0, 0);
         itemposition =position;
     }
@@ -307,6 +317,22 @@ public class FirstFragment extends Fragment implements MyRecyclerViewAdapter.MyI
                 //不通知list中的所有item改变下标 原因不明  在判断position时有问题
                // adapter.notifyDataSetChanged();
 
+            }
+        });
+        mbtn_scancode = (Button) view.findViewById(R.id.btn_scancode);
+        mbtn_scancode.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String url =null;
+                if(list.size()!=0){
+                     url = list.get(itemposition).getUrl();
+                }else{
+                     url = list_best.get(itemposition).getUrl();
+                }
+                popupWindow.dismiss();
+                Intent intent = new Intent(getActivity(), ScanCodeActivity.class);
+                intent.putExtra(MyConstants.KEY_SCAN,url);
+                startActivity(intent);
             }
         });
     }

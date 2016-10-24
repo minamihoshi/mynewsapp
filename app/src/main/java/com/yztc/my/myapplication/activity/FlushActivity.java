@@ -61,7 +61,7 @@ public class FlushActivity extends AppCompatActivity {
                 intent.setClass(FlushActivity.this,MainActivity.class);
             }else{
                 intent.setClass(FlushActivity.this,GuideActivity.class);
-                  // PreUtils.writeBoolean(FlushActivity.this,KEY_ISGOTOMAIN,true);
+                  PreUtils.writeBoolean(FlushActivity.this,KEY_ISGOTOMAIN,true);
             }
 
 

@@ -46,6 +46,8 @@ public class MySaveAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
         ((MyViewHolder)holder).tv_title.setText(list.get(position).getTitle());
         ((MyViewHolder)holder).tv_content.setText(list.get(position).getDate());
+        ((MyViewHolder)holder).mtv_type.setText(list.get(position).getAuthor_name());
+
         ((MyViewHolder)holder).miv.setImageResource(R.mipmap.ic_launcher);
 
         if(!TextUtils.isEmpty(list.get(position).getThumbnail_pic_s())){
@@ -84,7 +86,7 @@ public class MySaveAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
 
     class MyViewHolder extends RecyclerView.ViewHolder{
-        TextView tv_title ,tv_content ;
+        TextView tv_title ,tv_content,mtv_type;
         ImageView miv;
 
         public MyViewHolder(View itemView) {
@@ -92,6 +94,7 @@ public class MySaveAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             tv_title = (TextView) itemView.findViewById(R.id.tv_title);
             tv_content= (TextView) itemView.findViewById(R.id.tv_content);
             miv = (ImageView) itemView.findViewById(R.id.miv);
+            mtv_type = (TextView) itemView.findViewById(R.id.tv_type);
 
 
         }

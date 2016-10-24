@@ -5,10 +5,35 @@
         android:id="@+id/action_save"
         android:orderInCategory="100"
         android:title="收藏夹"
+
         app:showAsAction="never" />
+
     <item
-        android:id="@+id/action_settings"
+        android:id="@+id/action_scan"
         android:orderInCategory="100"
-        android:title="设置"
+        android:title="扫一扫"
+        android:icon="@drawable/code"
         app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_history"
+        android:orderInCategory="100"
+        android:title="浏览记录"
+        android:icon="@drawable/code"
+        app:showAsAction="never" />
+
+    <item android:title="设置">
+        <menu>
+            <item
+                android:id="@+id/mode_light"
+
+                android:title="白天模式" />
+            <item
+                android:id="@+id/mode_dark"
+
+                android:title="夜间模式" />
+        </menu>
+    </item>
+
+
 </menu>

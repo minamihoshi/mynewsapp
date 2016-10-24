@@ -12,5 +12,6 @@ public class MyConstants {
 
     public static final String KEY_WEB ="KEY_WEB";
 
+     public  static  final  String KEY_SCAN ="KEY_SCAN";
 
 }

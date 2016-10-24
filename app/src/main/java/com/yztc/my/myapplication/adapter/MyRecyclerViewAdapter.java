@@ -50,6 +50,8 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         ((MyViewHolder)holder).mtv_title.setText(data.getTitle());
         ((MyViewHolder)holder).mtv_content.setText(data.getDate());
 
+        ((MyViewHolder)holder).mtv_type.setText(list.get(position).getAuthor_name());
+
         if(!TextUtils.isEmpty(data.getThumbnail_pic_s())){
             Picasso.with(context).load(data.getThumbnail_pic_s()).fit()
                     .placeholder(R.mipmap.ic_launcher).error(R.mipmap.ic_launcher)
@@ -86,7 +88,7 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
     class MyViewHolder extends RecyclerView.ViewHolder{
 
-        TextView mtv_title ,mtv_content;
+        TextView mtv_title ,mtv_content,mtv_type;
         ImageView miv_news;
         public MyViewHolder(View itemView) {
             super(itemView);
@@ -94,6 +96,8 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.Vie
             mtv_title = (TextView) itemView.findViewById(R.id.tv_title);
             mtv_content = (TextView) itemView.findViewById(R.id.tv_content);
             miv_news = (ImageView) itemView.findViewById(R.id.miv);
+            mtv_type = (TextView) itemView.findViewById(R.id.tv_type);
+
         }
     }
 }

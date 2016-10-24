@@ -1,7 +1,9 @@
 package com.yztc.my.myapplication.activity;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
@@ -11,6 +13,7 @@ import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBar;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -22,26 +25,38 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageView;
 import android.widget.TableLayout;
 import android.widget.Toast;
 
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.yztc.my.myapplication.R;
 import com.yztc.my.myapplication.adapter.Myadapter;
 import com.yztc.my.myapplication.constant.MyConstants;
 import com.yztc.my.myapplication.fragment.FirstFragment;
+import com.yztc.zxinglibrary.android.CaptureActivity;
 
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
-    private long backStartTime,backEndTime;
+    private long backStartTime, backEndTime;
+    private static final int REQUEST_CODE_SCAN = 0x0000;
+    private static final String DECODED_CONTENT_KEY = "codedContent";
+    private static final String DECODED_BITMAP_KEY = "codedBitmap";
     private CollapsingToolbarLayoutState state;
+
 
     private enum CollapsingToolbarLayoutState {
         EXPANDED,
         COLLAPSED,
         INTERNEDIATE
     }
+
     private FirstFragment fragment;
+    private ActionBar actionBar;
+    private ImageView miv;
     private AppBarLayout appBarLayout;
     private Toolbar toolbar;
     private DrawerLayout drawer;
@@ -51,21 +66,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private Myadapter myadapter;
     private CollapsingToolbarLayout collapsingToolbarLayout;
     //top(头条，默认),shehui(社会),guonei(国内),guoji(国际),yule(娱乐),tiyu(体育)junshi(军事),keji(科技),caijing(财经),shishang(时尚)
-    private static final String[] TABS={"头条","社会","国内","国际","娱乐","体育","军事","科技","财经","时尚"};
-    private static final String [] TABTYPES={"top","shehui","guonei","guoji","yule","tiyu","junshi","keji","caijing","shishang"};
+    private static final String[] TABS = {"头条", "社会", "国内", "国际", "娱乐", "体育", "军事", "科技", "财经", "时尚"};
+    private static final String[] TABTYPES = {"top", "shehui", "guonei", "guoji", "yule", "tiyu", "junshi", "keji", "caijing", "shishang"};
     private ArrayList<Fragment> list;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-
         setContentView(R.layout.activity_main);
 
         list = new ArrayList<>();
         initFragments();
         initadapter();
         initView();
-
 
 
 //        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -83,9 +96,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 //        });
 
 
-
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_close,R.string.navigation_drawer_open);
+                this, drawer, toolbar, R.string.navigation_drawer_close, R.string.navigation_drawer_open);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
@@ -106,18 +118,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 //        });
 
 
+
     }
 
     private void initadapter() {
-        myadapter =new Myadapter(getSupportFragmentManager(),list,TABS);
+        myadapter = new Myadapter(getSupportFragmentManager(), list, TABS);
+
     }
 
     private void initFragments() {
-        for(int i =0;i<TABS.length;i++){
-            FirstFragment fragment =new FirstFragment();
+        for (int i = 0; i < TABS.length; i++) {
+            FirstFragment fragment = new FirstFragment();
 
             Bundle bundle = new Bundle();
-            bundle.putString(MyConstants.TYPE_KEY,TABTYPES[i]);
+            bundle.putString(MyConstants.TYPE_KEY, TABTYPES[i]);
             fragment.setArguments(bundle);
             list.add(fragment);
 
@@ -126,17 +140,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void initView() {
-         toolbar = (Toolbar) findViewById(R.id.toolbar);
+        miv = (ImageView) findViewById(R.id.miv_yztc);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitleTextColor(Color.parseColor("#ffffff"));
-         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         setSupportActionBar(toolbar);
+        actionBar = getSupportActionBar();
         mTabLayout = (TabLayout) findViewById(R.id.mtablayout);
         mViewPager = (ViewPager) findViewById(R.id.myviewpager);
         mViewPager.setAdapter(myadapter);
+        mViewPager.setOffscreenPageLimit(5);
         mTabLayout.setupWithViewPager(mViewPager);
         mTabLayout.setBackgroundColor(getResources().getColor(R.color.kong));
         mTabLayout.setTabMode(TabLayout.MODE_SCROLLABLE);
-
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
@@ -157,15 +173,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     }
                 } else if (Math.abs(verticalOffset) >= appBarLayout.getTotalScrollRange()) {
                     if (state != CollapsingToolbarLayoutState.COLLAPSED) {
-                        toolbar.setTitle("新闻早知道");//设置title不显示
+
                         state = CollapsingToolbarLayoutState.COLLAPSED;//修改状态标记为折叠
+                        toolbar.setTitle("新闻早知道");//设置title
+
+                        miv.setVisibility(View.GONE);
                     }
                 } else {
                     if (state != CollapsingToolbarLayoutState.INTERNEDIATE) {
-                        if(state == CollapsingToolbarLayoutState.COLLAPSED){
+                        if (state == CollapsingToolbarLayoutState.COLLAPSED) {
                         }
                         toolbar.setTitle("");//设置title为INTERNEDIATE
                         state = CollapsingToolbarLayoutState.INTERNEDIATE;//修改状态标记为中间
+
                     }
                 }
             }
@@ -198,11 +218,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.mode_dark) {
             return true;
-        }else if(id== R.id.action_save){
-            Intent intent = new Intent(this,SaveActivity.class);
+        } else if (id == R.id.mode_dark) {
+            return true;
+        } else if (id == R.id.action_save) {
+            Intent intent = new Intent(this, SaveActivity.class);
             startActivity(intent);
+        } else if (id == R.id.action_scan) {
+            Intent intent = new Intent(MainActivity.this,
+                    CaptureActivity.class);
+            startActivityForResult(intent, REQUEST_CODE_SCAN);
         }
 
         return super.onOptionsItemSelected(item);
@@ -217,10 +243,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             // Handle the camera action
         } else if (id == R.id.nav_gallery) {
-            Intent intent = new Intent(this,SaveActivity.class);
+            Intent intent = new Intent(this, SaveActivity.class);
             startActivity(intent);
 
         } else if (id == R.id.nav_slideshow) {
+
+            Intent intent = new Intent(this, ScanCodeActivity.class);
+            startActivity(intent);
 
         } else if (id == R.id.nav_manage) {
 
@@ -253,8 +282,25 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
 
+    //二维码回传数据
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        // 扫描二维码/条码回传
+        if (requestCode == REQUEST_CODE_SCAN && resultCode == RESULT_OK) {
+            if (data != null) {
+
+                String content = data.getStringExtra(DECODED_CONTENT_KEY);
+                Bitmap bitmap = data.getParcelableExtra(DECODED_BITMAP_KEY);
+
+                Toast.makeText(this, content, Toast.LENGTH_SHORT).show();
+//                qrCoded.setText("解码结果： \n" + content);
+//                qrCodeImage.setImageBitmap(bitmap);
 
 
+            }
+        }
+    }
 
 
 }

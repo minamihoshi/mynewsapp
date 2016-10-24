@@ -24,6 +24,7 @@
     app:layout_scrollFlags="scroll|enterAlwaysCollapsed|exitUntilCollapsed"
     >
     <ImageView
+        android:id="@+id/miv_yztc"
         android:src="@mipmap/yztc"
         android:layout_width="match_parent"
         android:layout_height="200dp"
