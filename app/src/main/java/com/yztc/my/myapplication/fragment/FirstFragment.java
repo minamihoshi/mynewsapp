@@ -72,6 +72,7 @@ public class FirstFragment extends Fragment implements MyRecyclerViewAdapter.MyI
     private View headerView;
     private View footView;
 
+
     private Handler handler = new Handler(){
         @Override
         public void handleMessage(Message msg) {
@@ -206,7 +207,6 @@ public class FirstFragment extends Fragment implements MyRecyclerViewAdapter.MyI
     footView =LayoutInflater.from(getActivity()).inflate(R.layout.listview_footer,recyclerView,false);
      recyclerView.addHeaderView(headerView);
      recyclerView.addFootView(footView);
-
      recyclerView.setArrowImageView(R.drawable.ic_pulltorefresh_arrow);
 
 
@@ -218,12 +218,14 @@ public class FirstFragment extends Fragment implements MyRecyclerViewAdapter.MyI
 
 
     }
-
+    //其他新闻的打开网页方法
     private void openweb_other(int position) {
         //Toast.makeText(getActivity(),"other",Toast.LENGTH_SHORT).show();
         Intent intent = new Intent(getActivity(), WebActivity.class);
         Bundle bundle = new Bundle();
         NewsData.ResultBean.DataBean dataBean = list.get(position);
+        myNewsBean = new MyNewsData(dataBean.getTitle(),dataBean.getDate(),dataBean.getAuthor_name(),dataBean.getThumbnail_pic_s(),dataBean.getThumbnail_pic_s03(),dataBean.getUrl(),dataBean.getCategory(),dataBean.getCategory());
+        ((App)(getActivity().getApplication())).liteOrm2.save(myNewsBean);
         bundle.putSerializable(MyConstants.KEY_WEB,dataBean);
         intent.putExtras(bundle);
         startActivity(intent);
@@ -242,12 +244,17 @@ public class FirstFragment extends Fragment implements MyRecyclerViewAdapter.MyI
     public void onClickBest(int position) {
         openweb(position);
     }
-
+    //头条新闻的打开网页方法
     private void openweb(int position) {
         //Toast.makeText(getActivity(),"top",Toast.LENGTH_SHORT).show();
         Intent intent = new Intent(getActivity(), WebActivity.class);
         Bundle bundle = new Bundle();
         BestNewsData.ResultBean.DataBean dataBean = list_best.get(position);
+
+        //记录历史数据
+        myNewsBean = new MyNewsData(dataBean.getTitle(),dataBean.getDate(),dataBean.getAuthor_name(),dataBean.getThumbnail_pic_s(),dataBean.getThumbnail_pic_s03(),dataBean.getUrl(),dataBean.getType(),dataBean.getRealtype());
+        ((App)(getActivity().getApplication())).liteOrm2.save(myNewsBean);
+
         bundle.putSerializable(MyConstants.KEY_WEB,dataBean);
         intent.putExtras(bundle);
         startActivity(intent);

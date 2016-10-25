@@ -30,4 +30,8 @@
         <item name="android:background">@color/black_overlay</item>
     </style>
 
+    <style name="MyTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="MyTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
 </resources>

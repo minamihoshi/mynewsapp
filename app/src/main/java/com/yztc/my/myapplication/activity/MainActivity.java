@@ -25,6 +25,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TableLayout;
 import android.widget.Toast;
@@ -101,23 +102,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
-        //点击toolbar 将列表滚动到最上
-
-//        toolbar.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                backEndTime = System.currentTimeMillis();
-//                if (backEndTime - backStartTime > 2000) {
-//                    Toast.makeText(MainActivity.this, "滚动", Toast.LENGTH_SHORT).show();
-//                    backStartTime = backEndTime;
-//                }else{
-//                    Log.e("TAG", "+++++++++++++++"+mViewPager.getChildCount());
-//                   // fragment.scrollTop();
-//                }
-//            }
-//        });
 
 
+        toolbar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                backEndTime = System.currentTimeMillis();
+                if (backEndTime - backStartTime > 2000) {
+                    //Toast.makeText(MainActivity.this, "滚动", Toast.LENGTH_SHORT).show();
+                    backStartTime = backEndTime;
+                }else{
+                    miv.setVisibility(View.VISIBLE);
+                }
+            }
+        });
 
     }
 
@@ -175,9 +173,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     if (state != CollapsingToolbarLayoutState.COLLAPSED) {
 
                         state = CollapsingToolbarLayoutState.COLLAPSED;//修改状态标记为折叠
-                        toolbar.setTitle("新闻早知道");//设置title
 
-                        miv.setVisibility(View.GONE);
+                        ((ViewGroup)miv.getParent()).removeView(miv);
+                        //toolbar.setTitle("新闻早知道");//设置title
+                        actionBar.setTitle("xinwen");
+                       // miv.setVisibility(View.GONE);
+
                     }
                 } else {
                     if (state != CollapsingToolbarLayoutState.INTERNEDIATE) {
@@ -252,6 +253,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             startActivity(intent);
 
         } else if (id == R.id.nav_manage) {
+            Intent intent = new Intent(this,RecordActivity.class);
+            startActivity(intent);
 
         } else if (id == R.id.nav_share) {
 
@@ -292,6 +295,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                 String content = data.getStringExtra(DECODED_CONTENT_KEY);
                 Bitmap bitmap = data.getParcelableExtra(DECODED_BITMAP_KEY);
+
+               // http://([\w-]+\.)+[\w-]+(/[\w- ./?%&=]*)?   正则
 
                 Toast.makeText(this, content, Toast.LENGTH_SHORT).show();
 //                qrCoded.setText("解码结果： \n" + content);

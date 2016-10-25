@@ -43,7 +43,7 @@ public class SaveActivity extends AppCompatActivity implements MySaveAdapter.MyI
     private MyNewsData databean;
     private PopupWindow popupWindow;
     private int itemposition;
-
+    private LinearLayoutManager manager;
     private Button mbtn_openweb,mbtn_del;
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
@@ -82,17 +82,17 @@ public class SaveActivity extends AppCompatActivity implements MySaveAdapter.MyI
             }
         });
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+//        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+//        fab.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+//                        .setAction("Action", null).show();
+//            }
+//        });
+//        // ATTENTION: This was auto-generated to implement the App Indexing API.
+//        // See https://g.co/AppIndexing/AndroidStudio for more information.
+//        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
     private void initPopup() {
@@ -139,7 +139,12 @@ public class SaveActivity extends AppCompatActivity implements MySaveAdapter.MyI
     private void initView() {
 
         recyclerView = (RecyclerView) findViewById(R.id.recycler_save);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+        manager =new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+        recyclerView.setLayoutManager(manager);
+        //设置倒序显示
+        manager.setStackFromEnd(true);//列表再底部开始展示，反转后由上面开始展示
+        manager.setReverseLayout(true);//列表翻转
+
 
     }
 
@@ -156,7 +161,10 @@ public class SaveActivity extends AppCompatActivity implements MySaveAdapter.MyI
     }
 
     private void openweb(int position) {
+
         databean = list.get(position);
+        //记录历史数据
+        ((App)getApplication()).liteOrm2.insert(databean);
         Intent intent = new Intent(this, WebActivity.class);
         Bundle bundle = new Bundle();
         bundle.putSerializable(MyConstants.KEY_WEB, databean);

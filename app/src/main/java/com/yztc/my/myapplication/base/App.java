@@ -9,9 +9,11 @@ import com.litesuits.orm.LiteOrm;
  */
 public class App extends Application{
     public LiteOrm liteOrm;
+    public LiteOrm liteOrm2;
     @Override
     public void onCreate() {
         super.onCreate();
         liteOrm = LiteOrm.newSingleInstance(this,"news.db");
+        liteOrm2 =LiteOrm.newSingleInstance(this,"record.db");
     }
 }

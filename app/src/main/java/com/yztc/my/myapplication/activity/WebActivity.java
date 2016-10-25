@@ -46,6 +46,7 @@ public class WebActivity extends AppCompatActivity {
     private NewsData.ResultBean.DataBean dataBean;
     private BestNewsData.ResultBean.DataBean dataBean_best;
     private MyNewsData myNewsBean;
+    private long backStartTime ,backEndTime;
 
    // private NewsInfoManager manager;
     @Override
@@ -107,6 +108,20 @@ public class WebActivity extends AppCompatActivity {
         toolbar.setTitleTextColor(Color.WHITE);
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
+        toolbar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                backEndTime = System.currentTimeMillis();
+                if (backEndTime - backStartTime > 2000) {
+                    //Toast.makeText(SaveActivity.this, "滚动", Toast.LENGTH_SHORT).show();
+                    backStartTime = backEndTime;
+                }else{
+                   webView.scrollTo(0,0);
+
+                }
+            }
+        });
 
         initView();
         initWeb();
@@ -115,14 +130,14 @@ public class WebActivity extends AppCompatActivity {
 
 
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+//        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+//        fab.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+//                        .setAction("Action", null).show();
+//            }
+//        });
     }
 
     private void initWeb() {
@@ -147,19 +162,20 @@ public class WebActivity extends AppCompatActivity {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 view.loadUrl(url);
+                Log.e("TAG", "shouldOverrideUrlLoading: "+url);
                 return true;
             }
-
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
                 super.onPageStarted(view, url, favicon);
             }
-
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
             }
         });
+
+
 
     }
 
@@ -169,6 +185,7 @@ public class WebActivity extends AppCompatActivity {
 
             case android.R.id.home :
                 finish();
+                webView.scrollTo(0,0);
                 break;
             case R.id.save:
 
@@ -220,4 +237,6 @@ public class WebActivity extends AppCompatActivity {
 
         super.onDestroy();
     }
+
+
 }

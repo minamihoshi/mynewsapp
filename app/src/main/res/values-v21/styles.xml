@@ -7,7 +7,6 @@
         <item name="colorAccent">@color/colorAccent</item>
 
 
-
     </style>
 
     <style name="MyTheme" parent="Theme.AppCompat.Light.NoActionBar">
@@ -15,7 +14,6 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
-
 
 
     </style>
