@@ -33,6 +33,12 @@ import android.widget.Toast;
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.umeng.socialize.ShareAction;
+import com.umeng.socialize.UMShareAPI;
+import com.umeng.socialize.UMShareListener;
+import com.umeng.socialize.bean.SHARE_MEDIA;
+import com.umeng.socialize.editorpage.ShareActivity;
+import com.umeng.socialize.media.UMImage;
 import com.yztc.my.myapplication.R;
 import com.yztc.my.myapplication.adapter.Myadapter;
 import com.yztc.my.myapplication.constant.MyConstants;
@@ -103,7 +109,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         toggle.syncState();
 
 
-
+          //TODO 双击顶端
         toolbar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -174,10 +180,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                         state = CollapsingToolbarLayoutState.COLLAPSED;//修改状态标记为折叠
 
-                        ((ViewGroup)miv.getParent()).removeView(miv);
-                        //toolbar.setTitle("新闻早知道");//设置title
-                        actionBar.setTitle("xinwen");
-                       // miv.setVisibility(View.GONE);
+                       ;
+                        miv.setVisibility(View.GONE);
+                        toolbar.setTitle("新闻早知道");//设置title
 
                     }
                 } else {
@@ -211,6 +216,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
+
+    //TODO 右上角菜单
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -230,6 +237,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             Intent intent = new Intent(MainActivity.this,
                     CaptureActivity.class);
             startActivityForResult(intent, REQUEST_CODE_SCAN);
+        }else if(id==R.id.action_history){
+            Intent intent = new Intent(this,RecordActivity.class);
+            startActivity(intent);
         }
 
         return super.onOptionsItemSelected(item);
@@ -241,7 +251,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Handle navigation view item clicks here.
         int id = item.getItemId();
         if (id == R.id.nav_camera) {
-
             // Handle the camera action
         } else if (id == R.id.nav_gallery) {
             Intent intent = new Intent(this, SaveActivity.class);
@@ -252,11 +261,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             Intent intent = new Intent(this, ScanCodeActivity.class);
             startActivity(intent);
 
-        } else if (id == R.id.nav_manage) {
+        } else if (id == R.id.nav_history) {
             Intent intent = new Intent(this,RecordActivity.class);
             startActivity(intent);
 
         } else if (id == R.id.nav_share) {
+            shareUM();
 
         } else if (id == R.id.nav_send) {
 
@@ -289,6 +299,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        //友盟回传
+        UMShareAPI.get(this).onActivityResult(requestCode, resultCode, data);
         // 扫描二维码/条码回传
         if (requestCode == REQUEST_CODE_SCAN && resultCode == RESULT_OK) {
             if (data != null) {
@@ -306,6 +318,46 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         }
     }
+
+
+    void shareUM(){
+        UMImage image = new UMImage(MainActivity.this, R.drawable.info_flow_channel_icon_2);
+        new ShareAction(MainActivity.this).setPlatform(SHARE_MEDIA.QQ)
+                .withText("新闻早知道")
+                .withTargetUrl("http://www.baidu.com")
+                .withMedia(image)
+                .setCallback(umShareListener)
+                .share();
+
+//        new ShareAction(MainActivity.this).withText("hello")
+//                .setDisplayList(SHARE_MEDIA.SINA,SHARE_MEDIA.QQ,SHARE_MEDIA.WEIXIN)
+//                .setCallback(umShareListener).open();
+
+    }
+
+    private UMShareListener umShareListener = new UMShareListener() {
+        @Override
+        public void onResult(SHARE_MEDIA platform) {
+            com.umeng.socialize.utils.Log.d("plat","platform"+platform);
+
+            Toast.makeText(MainActivity.this, platform + " 分享成功啦", Toast.LENGTH_SHORT).show();
+
+        }
+
+        @Override
+        public void onError(SHARE_MEDIA platform, Throwable t) {
+            Toast.makeText(MainActivity.this,platform + " 分享失败啦", Toast.LENGTH_SHORT).show();
+            if(t!=null){
+                com.umeng.socialize.utils.Log.d("throw","throw:"+t.getMessage());
+            }
+        }
+
+        @Override
+        public void onCancel(SHARE_MEDIA platform) {
+            Toast.makeText(MainActivity.this,platform + " 分享取消了", Toast.LENGTH_SHORT).show();
+        }
+    };
+
 
 
 }

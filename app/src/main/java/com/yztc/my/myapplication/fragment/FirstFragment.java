@@ -29,6 +29,10 @@ import android.widget.Toast;
 import com.google.gson.Gson;
 import com.google.zxing.WriterException;
 import com.jcodecraeer.xrecyclerview.XRecyclerView;
+import com.umeng.socialize.ShareAction;
+import com.umeng.socialize.UMShareListener;
+import com.umeng.socialize.bean.SHARE_MEDIA;
+import com.umeng.socialize.media.UMImage;
 import com.yztc.my.myapplication.R;
 import com.yztc.my.myapplication.activity.MainActivity;
 import com.yztc.my.myapplication.activity.ScanCodeActivity;
@@ -67,7 +71,7 @@ public class FirstFragment extends Fragment implements MyRecyclerViewAdapter.MyI
     private String type;
     private PopupWindow popupWindow;
     private int itemposition;
-    private Button mbtn_openweb,mbtn_save,mbtn_scancode;
+    private Button mbtn_openweb,mbtn_save,mbtn_scancode,mbtn_share;
     private MyNewsData myNewsBean;
     private View headerView;
     private View footView;
@@ -342,7 +346,73 @@ public class FirstFragment extends Fragment implements MyRecyclerViewAdapter.MyI
                 startActivity(intent);
             }
         });
+        mbtn_share = (Button) view.findViewById(R.id.btn_share);
+        mbtn_share .setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.e("SHARE", "onClick-----------------share" );
+                String url =null;
+                String title =null;
+                String imagestring =null;
+                if(list.size()!=0){
+                    url = list.get(itemposition).getUrl();
+                    title=list.get(itemposition).getTitle();
+                    imagestring= list.get(itemposition).getThumbnail_pic_s();
+                }else{
+                    url = list_best.get(itemposition).getUrl();
+                    title=list_best.get(itemposition).getTitle();
+                    imagestring= list_best.get(itemposition).getThumbnail_pic_s();
+                }
+                popupWindow.dismiss();
+
+                shareUM(title,url,imagestring);
+
+            }
+        });
+
     }
+
+
+
+    void shareUM(String title,String url,String imagestirng){
+        UMImage image = new UMImage(getActivity(), imagestirng);
+        new ShareAction(getActivity()).setPlatform(SHARE_MEDIA.QQ)
+                .withText(title)
+                .withTargetUrl(url)
+                .withMedia(image)
+                .setCallback(umShareListener)
+                .share();
+
+//        new ShareAction(MainActivity.this).withText("hello")
+//                .setDisplayList(SHARE_MEDIA.SINA,SHARE_MEDIA.QQ,SHARE_MEDIA.WEIXIN)
+//                .setCallback(umShareListener).open();
+
+    }
+
+    private UMShareListener umShareListener = new UMShareListener() {
+        @Override
+        public void onResult(SHARE_MEDIA platform) {
+            com.umeng.socialize.utils.Log.d("plat","platform"+platform);
+
+            Toast.makeText(getActivity(), platform + " 分享成功啦", Toast.LENGTH_SHORT).show();
+
+        }
+
+        @Override
+        public void onError(SHARE_MEDIA platform, Throwable t) {
+            Toast.makeText(getActivity(),platform + " 分享失败啦", Toast.LENGTH_SHORT).show();
+            if(t!=null){
+                com.umeng.socialize.utils.Log.d("throw","throw:"+t.getMessage());
+            }
+        }
+
+        @Override
+        public void onCancel(SHARE_MEDIA platform) {
+            Toast.makeText(getActivity(),platform + " 分享取消了", Toast.LENGTH_SHORT).show();
+        }
+    };
+
+
 
 
 }

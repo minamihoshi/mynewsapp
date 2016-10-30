@@ -44,7 +44,7 @@ public class SaveActivity extends AppCompatActivity implements MySaveAdapter.MyI
     private PopupWindow popupWindow;
     private int itemposition;
     private LinearLayoutManager manager;
-    private Button mbtn_openweb,mbtn_del;
+    private Button mbtn_openweb,mbtn_del,mbtn_share,mbtn_top;
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -74,10 +74,10 @@ public class SaveActivity extends AppCompatActivity implements MySaveAdapter.MyI
 
                     backEndTime = System.currentTimeMillis();
                     if (backEndTime - backStartTime > 2000) {
-                        //Toast.makeText(SaveActivity.this, "滚动", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(SaveActivity.this, "滚动", Toast.LENGTH_SHORT).show();
                         backStartTime = backEndTime;
                     }else{
-                        recyclerView.smoothScrollToPosition(0);
+                        recyclerView.smoothScrollToPosition(list.size()-1);
                     }
             }
         });
@@ -124,6 +124,22 @@ public class SaveActivity extends AppCompatActivity implements MySaveAdapter.MyI
                // adapter.notifyItemRemoved(itemposition);
                 //不通知list中的所有item改变下标 原因不明  在判断position时有问题
                 adapter.notifyDataSetChanged();
+
+            }
+        });
+
+        mbtn_share = (Button) view.findViewById(R.id.btn_share);
+
+
+        mbtn_top = (Button) view.findViewById(R.id.btn_totop);
+        mbtn_top.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                MyNewsData data = list.get(itemposition);
+                list.remove(itemposition);
+                list.add(data);
+                adapter.notifyDataSetChanged();
+                popupWindow.dismiss();
 
             }
         });

@@ -18,6 +18,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.zxing.WriterException;
+import com.umeng.socialize.ShareAction;
+import com.umeng.socialize.UMShareListener;
+import com.umeng.socialize.bean.SHARE_MEDIA;
+import com.umeng.socialize.media.UMImage;
 import com.yztc.my.myapplication.R;
 import com.yztc.my.myapplication.constant.MyConstants;
 import com.yztc.zxinglibrary.android.CaptureActivity;
@@ -52,7 +56,6 @@ public class ScanCodeActivity extends AppCompatActivity {
         @Override
         public void run() {
             // Delayed removal of status and navigation bar
-
             // Note that some of these constants are new as of API 16 (Jelly Bean)
             // and API 19 (KitKat). It is safe to use them, as they are inlined
             // at compile-time and do nothing on earlier devices.
@@ -98,17 +101,20 @@ public class ScanCodeActivity extends AppCompatActivity {
         }
     };
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_scan_code);
+
+        //TODO 初始化  并将传来的url装换成图片
         initScan();
         Intent intent = getIntent();
-        String stringurl = intent.getStringExtra(MyConstants.KEY_SCAN);
+          stringurl = intent.getStringExtra(MyConstants.KEY_SCAN);
         Log.e("TAG", "onCreate: --------------------------"+stringurl);
-        Bitmap icon = BitmapFactory.decodeResource(getResources(), R.drawable.icon);
-        Bitmap bitmap = null;
+         icon = BitmapFactory.decodeResource(getResources(), R.drawable.info_flow_channel_icon_2);
+         bitmap = null;
         try {
             bitmap = CodeCreator.createQRCodeWithIcon(stringurl, icon);
         } catch (WriterException e) {
@@ -189,7 +195,11 @@ public class ScanCodeActivity extends AppCompatActivity {
         mHideHandler.removeCallbacks(mHideRunnable);
         mHideHandler.postDelayed(mHideRunnable, delayMillis);
     }
-
+    //TODO 二维码参数
+    //TODO url地址 小图标 二维码本体
+    private String stringurl;
+    private Bitmap icon;
+    private Bitmap bitmap;
     private static final int REQUEST_CODE_SCAN = 0x0000;
     private static final String DECODED_CONTENT_KEY = "codedContent";
     private static final String DECODED_BITMAP_KEY = "codedBitmap";
@@ -208,11 +218,10 @@ public class ScanCodeActivity extends AppCompatActivity {
             //生成一个二维码
             @Override
             public void onClick(View arg0) {
-                String url = qrCodeUrl.getText().toString();
-                Bitmap icon = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
-                Bitmap bitmap = null;
+                stringurl = qrCodeUrl.getText().toString();
+                bitmap = null;
                 try {
-                    bitmap = CodeCreator.createQRCodeWithIcon(url, icon);
+                    bitmap = CodeCreator.createQRCodeWithIcon(stringurl, icon);
                 } catch (WriterException e) {
                     e.printStackTrace();
                 }
@@ -223,7 +232,7 @@ public class ScanCodeActivity extends AppCompatActivity {
             //跳转页面扫描
             @Override
             public void onClick(View arg0) {
-                // TODO Auto-generated method stub
+
                 Intent intent = new Intent(ScanCodeActivity.this,
                         CaptureActivity.class);
                 startActivityForResult(intent, REQUEST_CODE_SCAN);
@@ -233,8 +242,10 @@ public class ScanCodeActivity extends AppCompatActivity {
             //读取二维码图片信息
             @Override
             public boolean onLongClick(View v) {
-                String data = CodeCreator.getERCode(ScanCodeActivity.this);
-                Toast.makeText(ScanCodeActivity.this, data, Toast.LENGTH_SHORT).show();
+
+
+                shareUM("分享二维码",stringurl,bitmap);
+                Toast.makeText(ScanCodeActivity.this, stringurl, Toast.LENGTH_SHORT).show();
                 return true;
             }
         });
@@ -246,10 +257,10 @@ public class ScanCodeActivity extends AppCompatActivity {
         // 扫描二维码/条码回传
         if (requestCode == REQUEST_CODE_SCAN && resultCode == RESULT_OK) {
             if (data != null) {
-                String content = data.getStringExtra(DECODED_CONTENT_KEY);
-                Bitmap bitmap = data.getParcelableExtra(DECODED_BITMAP_KEY);
+                stringurl  = data.getStringExtra(DECODED_CONTENT_KEY);
+                bitmap = data.getParcelableExtra(DECODED_BITMAP_KEY);
 
-                qrCoded.setText("解码结果： \n" + content);
+                qrCoded.setText("解码结果： \n" + stringurl);
                 qrCodeImage.setImageBitmap(bitmap);
             }
         }
@@ -257,4 +268,49 @@ public class ScanCodeActivity extends AppCompatActivity {
 
 
 
+    void shareUM(String title,String url,Bitmap bitmap){
+        UMImage image = new UMImage(ScanCodeActivity.this, bitmap);
+        new ShareAction(ScanCodeActivity.this).setPlatform(SHARE_MEDIA.QQ)
+                .withText(title)
+                .withTargetUrl(url)
+                .withMedia(image)
+                .setCallback(umShareListener)
+                .share();
+
+//        new ShareAction(MainActivity.this).withText("hello")
+//                .setDisplayList(SHARE_MEDIA.SINA,SHARE_MEDIA.QQ,SHARE_MEDIA.WEIXIN)
+//                .setCallback(umShareListener).open();
+
+    }
+
+    private UMShareListener umShareListener = new UMShareListener() {
+        @Override
+        public void onResult(SHARE_MEDIA platform) {
+            com.umeng.socialize.utils.Log.d("plat","platform"+platform);
+
+            Toast.makeText(ScanCodeActivity.this, platform + " 分享成功啦", Toast.LENGTH_SHORT).show();
+
+        }
+
+        @Override
+        public void onError(SHARE_MEDIA platform, Throwable t) {
+            Toast.makeText(ScanCodeActivity.this,platform + " 分享失败啦", Toast.LENGTH_SHORT).show();
+            if(t!=null){
+                com.umeng.socialize.utils.Log.d("throw","throw:"+t.getMessage());
+            }
+        }
+
+        @Override
+        public void onCancel(SHARE_MEDIA platform) {
+            Toast.makeText(ScanCodeActivity.this,platform + " 分享取消了", Toast.LENGTH_SHORT).show();
+        }
+    };
+
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        icon =null;
+        bitmap=null;
+    }
 }
